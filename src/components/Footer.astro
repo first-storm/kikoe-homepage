@@ -1,0 +1,11 @@
+---
+import { site } from '../site';
+const gh = site.repository;
+const columns = [
+  {title:'Kikoe',links:[['Download','#download'],['Releases',gh+'/releases'],['Screenshots','#screenshots']]},
+  {title:'Documentation',links:[['Architecture',gh+'/blob/main/docs/architecture.md'],['UI design',gh+'/blob/main/docs/design.md'],['Packaging',gh+'/blob/main/docs/packaging.md']]},
+  {title:'Community',links:[['Source code',gh],['Issues',gh+'/issues'],['Translations',gh+'/tree/main/po']]},
+  {title:'License',links:[['GPL-3.0-or-later',gh+'/blob/main/LICENSE']]},
+];
+---
+<footer class="site-footer"><div class="footer-grid">{columns.map(column => <div><h2>{column.title}</h2><ul>{column.links.map(([label,href]) => <li><a href={href}>{label}</a></li>)}</ul></div>)}</div><p class="license">Kikoe is free software, licensed under GPL-3.0-or-later.</p></footer>

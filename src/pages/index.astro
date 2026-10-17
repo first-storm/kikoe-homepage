@@ -1,0 +1,69 @@
+---
+import { Image } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import CopyCommand from '../components/CopyCommand.astro';
+import { site } from '../site';
+import icon from '../assets/kikoe.svg';
+import heroLight from '../assets/hero-light.png';
+import heroDark from '../assets/hero-dark.png';
+import timing from '../assets/timing.png';
+import recording from '../assets/recording.png';
+import search from '../assets/search.png';
+import preferences from '../assets/preferences.png';
+const features = [
+  {title:'Record or import',text:'Capture your microphone with pause and resume, or bring in audio files you already have.',path:'M9 6a3 3 0 0 1 6 0v6a3 3 0 0 1-6 0V6Zm-4 5a7 7 0 0 0 14 0M12 18v3'},
+  {title:'Choose your service',text:'Deepgram, OpenAI, Gemini, Groq, Mistral and more, or any audio-capable LLM with your own prompt.',path:'M7 18a4 4 0 0 1-.6-7.95A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9H7Z'},
+  {title:'Or stay offline',text:'Download Whisper, Fun-ASR, Parakeet or Voxtral and transcribe on your own GPU or CPU. No account needed.',path:'M4 5h16v11H4V5ZM2 19h20'},
+  {title:'Follow each voice',text:'Optional timestamps and speaker labels, with names you can match across recordings.',path:'M12.5 8a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0ZM2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6'},
+  {title:'Polish your notes',text:'Edit text and timestamps in place with Undo and Redo, and search across titles and transcripts.',path:'M4 20h4L19 9l-4-4L4 16v4ZM13.5 6.5l4 4'},
+  {title:'Take them anywhere',text:'Export plain text, Markdown, SRT or WebVTT subtitles, or the original audio.',path:'M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5'},
+];
+const shots = [
+  {src:timing,alt:'Timestamp editor beside the transcript',title:'Fine-tune the timing',text:'Edit segment timestamps right beside the text.'},
+  {src:recording,alt:'A note recording in progress with a speaker-matching prompt',title:'Keep adding to a note',text:'Append recordings and match speakers across them.'},
+  {src:search,alt:'Searching notes by title and transcript',title:'Find anything you said',text:'Search matches titles and full transcripts.'},
+  {src:preferences,alt:'Preferences with providers and local models',title:'Your providers, your models',text:'Add API keys or download local models in Preferences.'},
+];
+const steps = [
+  ['Connect a provider','Add an API key and a model in Preferences, or download a local model.'],
+  ['Start a note','Record your microphone, or import audio with a file model.'],
+  ['Make it useful','Review the text, name speakers, and export from the note menu.'],
+];
+---
+<Base>
+  <Header/>
+  <main id="main">
+    <section class="hero container" aria-labelledby="hero-title">
+      <Image src={icon} alt="Kikoe app icon" width={128} height={128} loading="eager"/>
+      <span class="badge status warning">In development · Linux first</span>
+      <h1 id="hero-title">Your conversations, turned into useful notes.</h1>
+      <p class="hero-description">Record a meeting, import an interview, or capture a voice memo. Kikoe turns audio into searchable, editable notes with cloud speech-to-text services or models that run on your own computer.</p>
+      <div class="actions"><a class="button primary large" href="#download"><span aria-hidden="true">↓</span> Download</a><a class="button outline large" href={site.repository}>View source</a></div>
+      <p class="hero-meta">Free and open source · GPL-3.0-or-later · Built with GTK 4 and libadwaita</p>
+      <div class="hero-shot">
+        <Image class="hero-light" src={heroLight} alt="Kikoe showing a release-planning note with named speakers and timestamps" widths={[640,1120,1800,2360]} sizes="(max-width: 1200px) 94vw, 1120px" format="webp" loading="eager" fetchpriority="high"/>
+        <Image class="hero-dark" src={heroDark} alt="Kikoe showing a release-planning note with named speakers and timestamps in dark mode" widths={[640,1120,1800,2360]} sizes="(max-width: 1200px) 94vw, 1120px" format="webp" loading="eager"/>
+      </div>
+    </section>
+    <section id="features" class="section container" aria-labelledby="features-title">
+      <div class="section-intro"><h2 id="features-title">Capture, refine, share</h2><p>Recording, transcription and review live in one window. Your audio stays on your computer, and nothing uploads without you choosing a cloud model.</p></div>
+      <div class="features-grid">{features.map(feature => <article class="card feature"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={feature.path}/></svg><h3>{feature.title}</h3><p>{feature.text}</p></article>)}</div>
+    </section>
+    <section id="engines" class="section container" aria-labelledby="engines-title">
+      <div class="section-intro"><h2 id="engines-title">Cloud or on your device</h2><p>Pick a model per note. Options a model does not support are turned off for you, so every choice in Preferences is one that works.</p></div>
+      <div class="engines-grid">
+        <article class="card engine"><div class="card-heading"><h3>Cloud services</h3><span class="badge">Your own API key</span></div><p>File and live transcription, with timestamps and speakers where the service provides them.</p><ul class="tags">{['Deepgram','OpenAI','OpenRouter','Gemini AI Studio','MiMo','Groq','Mistral','OpenAI-compatible API','Audio LLM'].map(tag => <li>{tag}</li>)}</ul></article>
+        <article class="card engine"><div class="card-heading"><h3>On this device</h3><span class="badge">No account</span></div><p>Models download from Preferences → Local Models and run with transcribe.cpp.</p><div class="tag-group"><h4>Models</h4><ul class="tags">{['Whisper','Fun-ASR','Parakeet','Voxtral'].map(tag => <li>{tag}</li>)}</ul></div><div class="tag-group"><h4>Runs on</h4><ul class="tags">{['Vulkan','CUDA','Metal','CPU'].map(tag => <li>{tag}</li>)}</ul></div></article>
+      </div>
+    </section>
+    <section id="screenshots" class="section container" aria-labelledby="screenshots-title"><h2 id="screenshots-title">A closer look</h2><div class="screenshots-grid">{shots.map(shot => <figure><div class="shot"><Image src={shot.src} alt={shot.alt} widths={[480,800,1180]} sizes="(max-width: 700px) 92vw, (max-width: 1100px) 45vw, 360px" format="webp" loading="lazy"/></div><figcaption><h3>{shot.title}</h3><p>{shot.text}</p></figcaption></figure>)}</div></section>
+    <section id="download" class="section container" aria-labelledby="download-title"><div class="download-band">
+      <div class="getting-started"><h2 id="download-title">Get started</h2><ol class="steps">{steps.map(([title,text]) => <li><div><h3>{title}</h3><p>{text}</p></div></li>)}</ol><div class="shortcuts"><span>Shortcuts</span><span><kbd>Ctrl+N</kbd> New note</span><span><kbd>Ctrl+O</kbd> Import</span><span><kbd>Ctrl+F</kbd> Search</span></div></div>
+      <div class="card install"><h3>Install on Linux with Flatpak</h3><p>The Kikoe Flatpak repository also delivers updates.</p><div class="commands">{site.install.map(command => <CopyCommand command={command}/>)}</div><div class="packages"><h4>Other packages · x86-64 and ARM</h4><div class="tags"><span class="badge status success">Linux · Flatpak, AppImage</span><span class="badge status warning">macOS · Preview</span><span class="badge status warning">Windows · Preview</span></div></div><div class="actions"><a class="button primary" href={site.repository+'/releases'}>↓ All downloads</a><a class="button secondary" href={site.repository+'#-get-started'}>Build from source</a></div></div>
+    </div></section>
+    <section class="community container" aria-labelledby="community-title"><h2 id="community-title">Help shape Kikoe</h2><p>Kikoe is still in development. Report issues, test real provider accounts, or translate it into your language.</p><div class="community-links"><a href={site.repository+'/issues'}>Report an issue</a><a href={site.repository+'/blob/main/AGENTS.md'}>Contributing guide</a><a href={site.repository+'/tree/main/po'}>Translations</a></div></section>
+  </main>
+  <Footer/>
+</Base>

@@ -1,0 +1,5 @@
+---
+interface Props { command: string }
+const { command } = Astro.props;
+---
+<div class="command"><pre><code>{command}</code></pre><button type="button" class="copy-button" aria-label="Copy command" data-command={command} hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V4H4v12h4"/></svg></button></div>

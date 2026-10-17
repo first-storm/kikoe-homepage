@@ -1,0 +1,77 @@
+---
+import '@fontsource-variable/inter';
+import '../styles/global.css';
+import { local, site } from '../site';
+interface Props { title?: string; notFound?: boolean }
+const { title = site.title, notFound = false } = Astro.props;
+const canonical = Astro.site ? new URL(local(notFound ? '404.html' : ''), Astro.site).href : undefined;
+const image = Astro.site ? new URL(local('social.png'), Astro.site).href : undefined;
+const schema = Astro.site && !notFound ? {
+  '@context':'https://schema.org',
+  '@graph': [
+    {'@type':'WebSite','@id':canonical+'#website',url:canonical,name:site.name,description:site.description,inLanguage:'en'},
+    {'@type':'SoftwareApplication',name:site.name,url:canonical,description:site.description,applicationCategory:'ProductivityApplication',operatingSystem:'Linux',license:'https://www.gnu.org/licenses/gpl-3.0.html',codeRepository:site.repository,isAccessibleForFree:true,screenshot:new URL(local('social.png'),Astro.site).href},
+  ],
+} : undefined;
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{title}</title><meta name="description" content={site.description}/>
+  <meta name="robots" content={notFound || !Astro.site ? 'noindex, follow' : 'index, follow'}/>
+  {canonical && !notFound && <link rel="canonical" href={canonical}/>}
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)"/>
+  <meta name="theme-color" content="#3e3947" media="(prefers-color-scheme: dark)"/>
+  <link rel="icon" type="image/svg+xml" href={local('favicon.svg')}/>
+  <link rel="apple-touch-icon" href={local('apple-touch-icon.png')}/>
+  <meta property="og:type" content="website"/><meta property="og:site_name" content="Kikoe"/>
+  <meta property="og:title" content={title}/><meta property="og:description" content={site.description}/><meta property="og:locale" content="en_US"/>
+  {canonical && <meta property="og:url" content={canonical}/>}
+  {image && <><meta property="og:image" content={image}/><meta property="og:image:width" content="1200"/><meta property="og:image:height" content="630"/><meta property="og:image:alt" content="Kikoe — conversations turned into useful notes"/></>}
+  <meta name="twitter:card" content="summary_large_image"/><meta name="twitter:title" content={title}/><meta name="twitter:description" content={site.description}/>
+  {image && <meta name="twitter:image" content={image}/>}
+  {schema && <script type="application/ld+json" set:html={JSON.stringify(schema).replace(/</g,'\\u003c')}/>}
+  <script is:inline>
+    try { const theme = localStorage.getItem('kikoe-theme'); if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme; } catch {}
+  </script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a><slot/>
+  <p id="copy-status" class="sr-only" role="status" aria-live="polite"></p>
+  <script>
+    const themeButton = document.querySelector<HTMLButtonElement>('.theme-toggle');
+    const dark = matchMedia('(prefers-color-scheme: dark)');
+    const isDark = () => document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : dark.matches;
+    function updateThemeLabel() { themeButton?.setAttribute('aria-label', `Switch to ${isDark() ? 'light' : 'dark'} theme`); }
+    if (themeButton) {
+      themeButton.hidden = false; updateThemeLabel(); dark.addEventListener('change',updateThemeLabel);
+      themeButton.addEventListener('click', () => { const theme = isDark() ? 'light' : 'dark'; document.documentElement.dataset.theme = theme; try { localStorage.setItem('kikoe-theme',theme); } catch {} updateThemeLabel(); });
+    }
+    const menu = document.querySelector<HTMLButtonElement>('.menu-toggle');
+    const nav = document.querySelector<HTMLElement>('#mobile-nav');
+    function closeMenu() { if (menu && nav) { menu.setAttribute('aria-expanded','false'); menu.setAttribute('aria-label','Open menu'); nav.hidden = true; } }
+    if (menu && nav) {
+      menu.hidden = false;
+      menu.addEventListener('click', () => { const open = menu.getAttribute('aria-expanded') !== 'true'; menu.setAttribute('aria-expanded',String(open)); menu.setAttribute('aria-label',open ? 'Close menu' : 'Open menu'); nav.hidden = !open; });
+      nav.addEventListener('click',event => { if ((event.target as HTMLElement).closest('a')) closeMenu(); });
+      document.addEventListener('keydown',event => { if (event.key === 'Escape' && !nav.hidden) { closeMenu(); menu.focus(); } });
+      matchMedia('(min-width: 760px)').addEventListener('change',event => { if (event.matches) closeMenu(); });
+    }
+    document.querySelectorAll<HTMLButtonElement>('.copy-button').forEach(button => {
+      button.hidden = false;
+      button.addEventListener('click', async () => {
+        const status = document.querySelector<HTMLElement>('#copy-status');
+        try {
+          await navigator.clipboard.writeText(button.dataset.command ?? '');
+          button.setAttribute('aria-label','Command copied'); button.dataset.copied = 'true';
+          if (status) { status.className = 'sr-only'; status.textContent = 'Command copied to clipboard.'; }
+          setTimeout(() => { button.setAttribute('aria-label','Copy command'); delete button.dataset.copied; },2000);
+        } catch {
+          if (status) { status.className = 'copy-notice'; status.textContent = 'Copy unavailable. Select the command text and copy it manually.'; }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

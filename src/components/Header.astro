@@ -1,0 +1,16 @@
+---
+import { local, site } from '../site';
+const links = [{name:'Features',href:'#features'},{name:'Screenshots',href:'#screenshots'},{name:'Download',href:'#download'},{name:'GitHub',href:site.repository}];
+---
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href={local()} aria-label="Kikoe home">Kikoe</a>
+    <nav class="desktop-nav" aria-label="Main">{links.map(link => <a href={link.href}>{link.name}</a>)}</nav>
+    <div class="header-actions">
+      <button class="icon-button theme-toggle" type="button" aria-label="Switch color theme" hidden><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20.5 13A8.5 8.5 0 0 1 11 3.5 8.5 8.5 0 1 0 20.5 13Z"/></svg></button>
+      <button class="icon-button menu-toggle" type="button" aria-controls="mobile-nav" aria-expanded="false" aria-label="Open menu" hidden><svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+    </div>
+  </div>
+  <nav id="mobile-nav" class="mobile-nav" aria-label="Mobile" hidden>{links.map(link => <a href={link.href}>{link.name}</a>)}</nav>
+  <noscript><nav class="noscript-nav" aria-label="Main">{links.map(link => <a href={link.href}>{link.name}</a>)}</nav></noscript>
+</header>
