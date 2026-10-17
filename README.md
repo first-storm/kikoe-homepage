@@ -1,89 +1,89 @@
 # Kikoe homepage
 
-把 `Kikoe — Home-html.zip` 中的设计稿实现为 Astro + TypeScript 静态官网。保留英文文案、原始截图和明暗配色；页面正文在构建时生成，不依赖浏览器运行 React。
+An Astro + TypeScript static website based on the design in `Kikoe — Home-html.zip`. It preserves the original English copy, screenshots, and light/dark color schemes. Page content is generated at build time and does not require React in the browser.
 
-## 本地开发
+## Local development
 
-需要 Node.js ≥ 22.22.0（建议 Node 24）和 npm。
+Requires Node.js ≥ 22.22.0 (Node 24 recommended) and npm.
 
 ```sh
 npm ci
 npm run dev
 ```
 
-开发地址由命令输出，通常为 `http://localhost:4321/`。
+The development URL is printed by the command, usually `http://localhost:4321/`.
 
 ```sh
-npm run check       # Astro / TypeScript 检查
-npm run build       # 输出 dist/
-npm run preview     # 预览 dist/，通常为 http://localhost:4321/
+npm run check       # Astro / TypeScript checks
+npm run build       # Output to dist/
+npm run preview     # Preview dist/, usually at http://localhost:4321/
 ```
 
-## 生产构建和部署
+## Production builds and deployment
 
-把实际部署地址写入环境变量或 `.env`。正式构建强制要求公共 HTTPS 地址：
+Set the actual deployment URL in an environment variable or `.env`. Production builds require a public HTTPS URL:
 
 ```sh
-SITE_URL=https://你的真实域名/ npm run build:production
+SITE_URL=https://your-real-domain/ npm run build:production
 ```
 
-部署到子路径时，地址包含部署目录：
+For deployment under a subpath, include the deployment directory in the URL:
 
 ```sh
-SITE_URL=https://你的真实域名/kikoe/ BASE_PATH=/kikoe/ npm run build:production
+SITE_URL=https://your-real-domain/kikoe/ BASE_PATH=/kikoe/ npm run build:production
 ```
 
-`BASE_PATH` 未设置时，从 `SITE_URL` 的路径推导；显式设置时优先使用 `BASE_PATH`。`.env.example` 提供配置说明，复制后应按部署目录修改或删除 `BASE_PATH`。资源、首页链接、canonical、分享图片地址和 sitemap 使用同一前缀。更改部署目录后必须重新构建。
+If `BASE_PATH` is not set, it is inferred from the path in `SITE_URL`; an explicitly set `BASE_PATH` takes precedence. `.env.example` documents the configuration. If you copy it, update or remove `BASE_PATH` to match your deployment directory. Assets, homepage links, canonical URLs, social image URLs, and the sitemap use the same prefix. Rebuild whenever the deployment directory changes.
 
-将 **`dist/` 内的内容**上传到静态托管服务的站点根目录，或上面配置的子目录。构建环境安装开发依赖；线上只需静态文件，不需要 Node 服务。
+Upload the **contents of `dist/`** to the root of your static hosting service or to the configured subdirectory. Install development dependencies in the build environment; production only needs the static files and does not require a Node.js server.
 
-- 静态托管的构建命令：`npm run build:production`；发布目录：`dist`；环境变量：`SITE_URL`，子路径部署可设置 `BASE_PATH`。
-- Nginx 等自管服务器应将未知地址以 HTTP 404 返回 `404.html`，不要把所有路径改写成首页；子路径部署时同步配置错误页位置。
-- HTTPS 托管支持剪贴板 API；无法使用时，页面会提示手动复制。
-- 不对 HTML 设置长期不可变缓存；带内容哈希的 `/_astro/` 资源可长期缓存。自定义子路径时相应添加前缀。
+- Static hosting build command: `npm run build:production`; publish directory: `dist`; environment variable: `SITE_URL`. Set `BASE_PATH` for subpath deployments.
+- On a self-managed server such as Nginx, return `404.html` with an HTTP 404 status for unknown paths. Do not rewrite every path to the homepage. Update the error-page location for subpath deployments.
+- HTTPS hosting supports the Clipboard API; if it is unavailable, the page prompts users to copy manually.
+- Do not set long-lived immutable caching for HTML. Hashed assets under `/_astro/` can be cached long-term. Add the appropriate prefix for custom subpaths.
 
-未提供 `SITE_URL` 的普通构建用于预览：正文完整，但包含 `noindex`，`robots.txt` 禁止抓取，并省略 canonical 和 sitemap。**上线收录前务必使用正式地址重新执行生产构建。** 仓库不预设域名、不含线上账号配置；本地构建不会自动发布。GitHub Pages 可通过下面的工作流自动部署。
+A regular build without `SITE_URL` is for preview: it includes the full page content, but adds `noindex`, blocks crawling in `robots.txt`, and omits the canonical URL and sitemap. **Before launching or enabling indexing, run a production build with the real public URL.** The repository does not assume a domain or include production account configuration; local builds do not publish automatically. The workflow below can deploy to GitHub Pages.
 
 ## GitHub Pages
 
-1. 将仓库推送到 GitHub 的 `main` 分支。
-2. 在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
-3. 在 **Actions → Deploy to GitHub Pages** 手动运行工作流，或再次推送到 `main` 触发部署。
+1. Push the repository to the `main` branch on GitHub.
+2. In the repository, go to **Settings → Pages → Build and deployment → Source** and select **GitHub Actions**.
+3. Run the workflow manually from **Actions → Deploy to GitHub Pages**, or push to `main` again to trigger a deployment.
 
-`.github/workflows/pages.yml` 在检查和浏览器验收通过后构建正式 `dist/`，通过 GitHub 官方 Pages Actions 上传并部署，无需创建 `gh-pages` 分支或提供个人访问令牌。部署地址显示在工作流的 `github-pages` environment 中。其他分支和 Pull Request 仍由原有 CI 检查，不触发 Pages 发布。
+`.github/workflows/pages.yml` runs checks and browser acceptance tests, builds the production `dist/`, then uploads and deploys it through the official GitHub Pages Actions. No `gh-pages` branch or personal access token is required. The deployment URL appears in the workflow's `github-pages` environment. Other branches and pull requests continue to use the existing CI checks and do not publish to Pages.
 
-工作流使用 `actions/configure-pages` 返回的 `base_url` 和 `base_path`，自动设置 `SITE_URL` 与 `BASE_PATH`，支持项目站点（`https://用户名.github.io/仓库名/`）、用户/组织根站点及 Pages 中配置的自定义域名；无需手动填写仓库变量。自定义域名先在 **Settings → Pages** 配置域名、DNS 和 HTTPS，再重新运行部署，使 canonical、分享图和 sitemap 同步更新。使用 Actions 发布时，无需添加 CNAME 文件。
+The workflow uses `base_url` and `base_path` returned by `actions/configure-pages` to set `SITE_URL` and `BASE_PATH` automatically. It supports project sites (`https://username.github.io/repository/`), user or organization root sites, and custom domains configured in Pages; no repository variables need to be entered manually. For a custom domain, configure the domain, DNS, and HTTPS in **Settings → Pages**, then run the deployment again so the canonical URL, social image, and sitemap are updated. No CNAME file is needed when publishing with Actions.
 
-在项目站点中，产物内的 `robots.txt` 位于 `/仓库名/robots.txt`；搜索引擎只读取域名根路径的 robots.txt。sitemap 已使用完整站点地址，可在搜索引擎站长工具中直接提交；需要独立 robots 策略时使用自定义域名或用户/组织根站点。
+On a project site, the generated `robots.txt` is located at `/repository/robots.txt`, while search engines only read `robots.txt` at the domain root. The sitemap uses the full site URL and can be submitted directly in search-engine webmaster tools. For an independent robots policy, use a custom domain or a user/organization root site.
 
-## SEO 与性能
+## SEO and performance
 
-正式构建提供 title、description、canonical、Open Graph、Twitter 分享信息、WebSite / SoftwareApplication JSON-LD、`robots.txt`、`sitemap.xml` 和 `noindex` 404。分享图与图标随静态产物部署，未虚构版本、评分或评论。
+Production builds provide a title, description, canonical URL, Open Graph and Twitter metadata, WebSite / SoftwareApplication JSON-LD, `robots.txt`, `sitemap.xml`, and a `noindex` 404 page. The social image and icons ship with the static output. No version, rating, or review information is fabricated.
 
-截图生成响应式 WebP；首屏截图优先加载，功能截图延迟加载。Inter 字体本地托管，许可证位于 `public/licenses/inter.txt`。页面支持语义化导航、跳转正文、可见焦点、系统明暗偏好与本地主题记忆。功能和下载链接来自上游 Kikoe 项目；官网本身不录音、不上传音频。
+Screenshots are generated as responsive WebP images; the hero screenshots load with priority and feature screenshots are lazy-loaded. Inter is hosted locally, and its license is at `public/licenses/inter.txt`. The page supports semantic navigation, a skip link, visible focus indicators, system light/dark preferences, and locally remembered theme choices. Features and download links come from the upstream Kikoe project; the website itself does not record or upload audio.
 
-## 验收
+## Verification
 
-首次安装测试浏览器：
+Install the test browser on first use:
 
 ```sh
 npx playwright install chromium
-# Linux 如缺少系统库，可使用 npx playwright install --with-deps chromium
+# On Linux, if system libraries are missing, use: npx playwright install --with-deps chromium
 npm test
 ```
 
-测试覆盖缺少正式地址时拒绝生产构建、本地预览禁止收录、正式 SEO、子路径资源、桌面与手机布局、明暗主题、菜单与 Escape、剪贴板成功及失败、减少动态效果、无 JavaScript 和 404。
+Tests cover rejecting production builds without a public URL, preventing indexing of local previews, production SEO, subpath assets, desktop and mobile layouts, light and dark themes, menus and Escape, clipboard success and failure, reduced motion, operation without JavaScript, and 404 behavior.
 
-测试在当前文件系统的独立临时目录构建并自动清理，不覆盖 `dist/`；浏览器截图保存在忽略的 `test-results/`。GitHub Actions 执行检查、测试和普通预览构建，并上传产物和截图；CI 产物默认禁止收录，GitHub Pages 发布工作流会另用真实 Pages 地址执行生产构建。其他托管平台上线时仍需自行设置 `SITE_URL`。
+Tests build in an isolated temporary directory on the current filesystem and clean it up automatically without overwriting `dist/`; browser screenshots are saved in the ignored `test-results/` directory. GitHub Actions runs checks, tests, and a regular preview build, then uploads the build output and screenshots. CI output is blocked from indexing by default; the GitHub Pages deployment workflow separately runs a production build using the real Pages URL. For other hosting platforms, set `SITE_URL` yourself before deployment.
 
-## 维护
+## Maintenance
 
-- `src/pages/index.astro`：首页文案、功能数据和页面组合。
-- `src/site.ts`：站点元数据、上游地址、安装命令和路径工具。
-- `src/layouts/Base.astro`：SEO、基础文档和浏览器交互。
-- `src/styles/global.css`：设计 token 和响应式布局。
-- `src/assets/`：原始截图和应用图标。
+- `src/pages/index.astro`: homepage copy, feature data, and page composition.
+- `src/site.ts`: site metadata, upstream URLs, install commands, and path utilities.
+- `src/layouts/Base.astro`: SEO, document scaffolding, and browser interactions.
+- `src/styles/global.css`: design tokens and responsive layout.
+- `src/assets/`: source screenshots and app icon.
 
-调整品牌图或首屏截图后运行 `npm run assets`，重新生成并提交 `public/social.png` 和 `public/apple-touch-icon.png`。设计稿 ZIP 保留为视觉参照，生产代码不加载设计工具的 vendor、support.js 或组件包。
+After adjusting the brand icon or hero screenshot, run `npm run assets` and commit the regenerated `public/social.png` and `public/apple-touch-icon.png`. Keep the design ZIP as a visual reference; production code does not load the design tool's vendor code, `support.js`, or component packages.
 
-项目变更按可审阅阶段提交；修改完成后执行 `npm run check`、`npm test`、`npm run build`。截图与构建产物不提交。
+Submit project changes in reviewable stages. After making changes, run `npm run check`, `npm test`, and `npm run build`. Do not commit screenshots or build output.
