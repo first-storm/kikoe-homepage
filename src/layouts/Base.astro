@@ -10,7 +10,7 @@ const schema = Astro.site && !notFound ? {
   '@context':'https://schema.org',
   '@graph': [
     {'@type':'WebSite','@id':canonical+'#website',url:canonical,name:site.name,description:site.description,inLanguage:'en'},
-    {'@type':'SoftwareApplication',name:site.name,url:canonical,description:site.description,applicationCategory:'ProductivityApplication',operatingSystem:'Linux',license:'https://www.gnu.org/licenses/gpl-3.0.html',codeRepository:site.repository,isAccessibleForFree:true,screenshot:new URL(local('social.png'),Astro.site).href},
+    {'@type':'SoftwareApplication',name:site.name,url:canonical,description:site.description,applicationCategory:'ProductivityApplication',operatingSystem:'Linux',license:'https://www.gnu.org/licenses/gpl-3.0.html',sameAs:site.repository,isAccessibleForFree:true,screenshot:new URL(local('social.png'),Astro.site).href},
   ],
 } : undefined;
 ---
