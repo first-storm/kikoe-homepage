@@ -42,7 +42,19 @@ SITE_URL=https://你的真实域名/kikoe/ BASE_PATH=/kikoe/ npm run build:produ
 - HTTPS 托管支持剪贴板 API；无法使用时，页面会提示手动复制。
 - 不对 HTML 设置长期不可变缓存；带内容哈希的 `/_astro/` 资源可长期缓存。自定义子路径时相应添加前缀。
 
-未提供 `SITE_URL` 的普通构建用于预览：正文完整，但包含 `noindex`，`robots.txt` 禁止抓取，并省略 canonical 和 sitemap。**上线收录前务必使用正式地址重新执行生产构建。** 仓库不预设域名、不含线上账号配置，也不会自动发布。
+未提供 `SITE_URL` 的普通构建用于预览：正文完整，但包含 `noindex`，`robots.txt` 禁止抓取，并省略 canonical 和 sitemap。**上线收录前务必使用正式地址重新执行生产构建。** 仓库不预设域名、不含线上账号配置；本地构建不会自动发布。GitHub Pages 可通过下面的工作流自动部署。
+
+## GitHub Pages
+
+1. 将仓库推送到 GitHub 的 `main` 分支。
+2. 在仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
+3. 在 **Actions → Deploy to GitHub Pages** 手动运行工作流，或再次推送到 `main` 触发部署。
+
+`.github/workflows/pages.yml` 在检查和浏览器验收通过后构建正式 `dist/`，通过 GitHub 官方 Pages Actions 上传并部署，无需创建 `gh-pages` 分支或提供个人访问令牌。部署地址显示在工作流的 `github-pages` environment 中。其他分支和 Pull Request 仍由原有 CI 检查，不触发 Pages 发布。
+
+工作流使用 `actions/configure-pages` 返回的 `base_url` 和 `base_path`，自动设置 `SITE_URL` 与 `BASE_PATH`，支持项目站点（`https://用户名.github.io/仓库名/`）、用户/组织根站点及 Pages 中配置的自定义域名；无需手动填写仓库变量。自定义域名先在 **Settings → Pages** 配置域名、DNS 和 HTTPS，再重新运行部署，使 canonical、分享图和 sitemap 同步更新。使用 Actions 发布时，无需添加 CNAME 文件。
+
+在项目站点中，产物内的 `robots.txt` 位于 `/仓库名/robots.txt`；搜索引擎只读取域名根路径的 robots.txt。sitemap 已使用完整站点地址，可在搜索引擎站长工具中直接提交；需要独立 robots 策略时使用自定义域名或用户/组织根站点。
 
 ## SEO 与性能
 
@@ -62,7 +74,7 @@ npm test
 
 测试覆盖缺少正式地址时拒绝生产构建、本地预览禁止收录、正式 SEO、子路径资源、桌面与手机布局、明暗主题、菜单与 Escape、剪贴板成功及失败、减少动态效果、无 JavaScript 和 404。
 
-测试在当前文件系统的独立临时目录构建并自动清理，不覆盖 `dist/`；浏览器截图保存在忽略的 `test-results/`。GitHub Actions 执行检查、测试和普通预览构建，并上传产物和截图；CI 产物默认禁止收录，正式上线需另用真实 `SITE_URL` 构建。
+测试在当前文件系统的独立临时目录构建并自动清理，不覆盖 `dist/`；浏览器截图保存在忽略的 `test-results/`。GitHub Actions 执行检查、测试和普通预览构建，并上传产物和截图；CI 产物默认禁止收录，GitHub Pages 发布工作流会另用真实 Pages 地址执行生产构建。其他托管平台上线时仍需自行设置 `SITE_URL`。
 
 ## 维护
 
